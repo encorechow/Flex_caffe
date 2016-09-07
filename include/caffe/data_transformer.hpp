@@ -90,6 +90,16 @@ class DataTransformer {
    */
   void Transform(Blob<Dtype>* input_blob, Blob<Dtype>* transformed_blob);
 
+  //#ifndef OSX
+  void LabelmapTransform(const cv::Mat& cv_img, Blob<Dtype>* transformed_blob, const int h_off, const int w_off, const bool do_mirror);
+  //#endif
+
+  //#ifndef OSX
+  void LocTransform(const cv::Mat& cv_img, Blob<Dtype>* transformed_blob, int &h_off, int &w_off, bool &do_mirror);
+  //#endif
+
+
+
   /**
    * @brief Infers the shape of transformed_blob will have when
    *    the transformation is applied to the data.

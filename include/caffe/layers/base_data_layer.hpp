@@ -52,6 +52,12 @@ class Batch {
 };
 
 template <typename Dtype>
+class LabelmapBatch {
+ public:
+  Blob<Dtype> data_, labelmap_;
+};
+
+template <typename Dtype>
 class BasePrefetchingDataLayer :
     public BaseDataLayer<Dtype>, public InternalThread {
  public:
@@ -80,6 +86,40 @@ class BasePrefetchingDataLayer :
 
   Blob<Dtype> transformed_data_;
 };
+
+
+template <typename Dtype>
+class BasePrefetchingLabelmapDataLayer :
+    public BaseDataLayer<Dtype>, public InternalThread {
+ public:
+  explicit BasePrefetchingLabelmapDataLayer(const LayerParameter& param);
+  // LayerSetUp: implements common data layer setup functionality, and calls
+  // DataLayerSetUp to do special data layer setup for individual layer types.
+  // This method may not be overridden.
+  void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+
+  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+
+  // Prefetches batches (asynchronously if to GPU memory)
+  static const int PREFETCH_COUNT = 3;
+
+ protected:
+  virtual void InternalThreadEntry();
+  virtual void load_batch(LabelmapBatch<Dtype>* labelmapbatch) = 0;
+
+  LabelmapBatch<Dtype> prefetch_[PREFETCH_COUNT];
+  BlockingQueue<LabelmapBatch<Dtype>*> prefetch_free_;
+  BlockingQueue<LabelmapBatch<Dtype>*> prefetch_full_;
+
+  Blob<Dtype> transformed_data_;
+  Blob<Dtype> transformed_labelmap_;
+};
+
+
 
 }  // namespace caffe
 

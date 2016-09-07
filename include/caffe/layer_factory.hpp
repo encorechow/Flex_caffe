@@ -78,6 +78,7 @@ class LayerRegistry {
     }
     const string& type = param.type();
     CreatorRegistry& registry = Registry();
+
     CHECK_EQ(registry.count(type), 1) << "Unknown layer type: " << type
         << " (known types: " << LayerTypeListString() << ")";
     return registry[type](param);
