@@ -401,6 +401,7 @@ message LayerParameter {
   optional ThresholdParameter threshold_param = 128;
   optional TileParameter tile_param = 138;
   optional WindowDataParameter window_data_param = 129;
+  optional FlexConvolutionParameter flex_convolution_param = 145;
 }
 
 // Message that stores parameters used to apply transformation
@@ -603,6 +604,19 @@ message ConvolutionParameter {
   // ignored and the ND implementation will be used.)
   optional bool force_nd_im2col = 17 [default = false];
 }
+
+
+message FlexConvolutionParameter {
+  optional uint32 sample_kernel_w = 1 [default = 3];
+  optional uint32 sample_kernel_h = 2 [default = 3];
+  enum Engine {
+    DEFAULT = 0;
+    CAFFE = 1;
+    CUDNN = 2;
+  }
+  optional Engine engine = 3 [default = DEFAULT];
+}
+
 
 message CropParameter {
   // To crop, elements of the first bottom are selected to fit the dimensions

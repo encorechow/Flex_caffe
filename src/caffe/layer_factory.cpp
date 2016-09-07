@@ -14,7 +14,9 @@
 #include "caffe/layers/sigmoid_layer.hpp"
 #include "caffe/layers/softmax_layer.hpp"
 #include "caffe/layers/tanh_layer.hpp"
+#include "caffe/layers/flex_conv_layer.hpp"
 #include "caffe/proto/caffe.pb.h"
+
 
 #ifdef USE_CUDNN
 #include "caffe/layers/cudnn_conv_layer.hpp"
@@ -32,6 +34,27 @@
 #endif
 
 namespace caffe {
+
+template <typename Dtype>
+shared_ptr<Layer<Dtype> > GetFlexConvolutionLayer(
+    const LayerParameter& param) {
+  FlexConvolutionParameter flex_conv_param = param.flex_convolution_param();
+  FlexConvolutionParameter_Engine engine = flex_conv_param.engine();
+
+  if (engine == FlexConvolutionParameter_Engine_DEFAULT) {
+    engine = FlexConvolutionParameter_Engine_CAFFE;
+  }
+  if (engine == FlexConvolutionParameter_Engine_CAFFE) {
+    return shared_ptr<Layer<Dtype> >(new FlexConvolutionLayer<Dtype>(param));
+  }
+  else {
+    LOG(FATAL) << "Layer " << param.name() << " has unknown engine.";
+  }
+}
+
+REGISTER_LAYER_CREATOR(FlexConvolution, GetFlexConvolutionLayer);
+
+
 
 // Get convolution layer according to engine.
 template <typename Dtype>
