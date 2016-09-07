@@ -1,0 +1,444 @@
+name: "bsds500"
+
+# Data Layers
+layer {
+  name: "data"
+  type: "ImageLabelmapData"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mirror: false
+    mean_value: 104.00699
+    mean_value: 116.66877
+    mean_value: 122.67892
+  }
+  image_data_param {
+    source: "../train_pair.lst"
+    batch_size: 1
+    shuffle: true
+    new_height: 0
+    new_width: 0
+  }
+}
+
+
+layer {
+  name: "data"
+  type: "ImageLabelmapData"
+  top: "data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  transform_param {
+    mirror: false
+    mean_value: 104.00699
+    mean_value: 116.66877
+    mean_value: 122.67892
+  }
+  image_data_param {
+    source: "../test_pair.lst"
+    batch_size: 1
+    shuffle: true
+    new_height: 0
+    new_width: 0
+  }
+}
+# Data Layers end
+
+# Convolutional Layer 1
+layer {
+  name: "conv"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv"
+  param {
+  lr_mult: 1
+  decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 32
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+# Convolutional Layer end
+
+# Batch Normalization
+
+layer{
+  name: "bn"
+  type: "BatchNorm"
+  bottom: "conv"
+  top: "conv_bn"
+}
+
+# Batch Normalization end
+
+# Conv ReLU
+layer {
+  name: "relu"
+  type: "ReLU"
+  bottom: "conv_bn"
+  top: "conv_bn"
+}
+
+# Conv ReLU end
+
+
+
+# Flex Convolutional Layer Concatenate with Pure Convolutional Layer 1
+
+layer {
+  name: "flexconv1"
+  type: "FlexConvolution"
+  bottom: "conv_bn"
+  top: "flexconv1"
+  param {
+    lr_mult: 100
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 16
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+  flex_convolution_param {
+    sample_kernel_h: 3
+    sample_kernel_w: 3
+  }
+}
+
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "conv_bn"
+  top: "conv1"
+  param {
+    lr_mult: 100
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param{
+    num_output: 16
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler{
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "concat1"
+  bottom: "conv1"
+  bottom: "flexconv1"
+  top: "concat1"
+  type: "Concat"
+  concat_param {
+    axis: 1
+  }
+}
+
+layer {
+  name: "weightconv1"
+  type: "Convolution"
+  bottom: "concat1"
+  top: "weightconv1"
+  param {
+    lr_mult: 100
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param{
+    num_output: 32
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler{
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "weightconv1"
+  top: "weightconv1"
+}
+
+# Flex Convolutional Layer Concatenate with Pure Convolutional Layer 1 End
+
+# Flex Convolutional Layer Concatenate with Pure Convolutional Layer 2
+
+layer {
+  name: "flexconv2"
+  type: "FlexConvolution"
+  bottom: "weightconv1"
+  top: "flexconv2"
+  param {
+    lr_mult: 100
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+  flex_convolution_param {
+    sample_kernel_h: 5
+    sample_kernel_w: 5
+  }
+}
+
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "weightconv1"
+  top: "conv2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param{
+    num_output: 32
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler{
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "concat2"
+  bottom: "conv2"
+  bottom: "flexconv2"
+  top: "concat2"
+  type: "Concat"
+  concat_param {
+    axis: 1
+  }
+}
+
+layer {
+  name: "weightconv2"
+  type: "Convolution"
+  bottom: "concat2"
+  top: "weightconv2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param{
+    num_output: 64
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler{
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+
+layer {
+  name: "relu2"
+  type: "ReLU"
+  bottom: "weightconv2"
+  top: "weightconv2"
+}
+
+
+# Flex Convolutional Layer Concatenate with Pure Convolutional Layer 2 End
+
+# Flex Convolutional Layer Concatenate with Pure Convolutional Layer 3
+
+layer {
+  name: "flexconv3"
+  type: "FlexConvolution"
+  bottom: "weightconv2"
+  top: "flexconv3"
+  param {
+    lr_mult: 0.0001
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 64
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 1
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+  flex_convolution_param {
+    sample_kernel_h: 5
+    sample_kernel_w: 5
+  }
+}
+
+layer {
+  name: "conv3"
+  type: "Convolution"
+  bottom: "weightconv2"
+  top: "conv3"
+  param {
+    lr_mult: 0.0001
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param{
+    num_output: 64
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    weight_filler{
+      type: "gaussian"
+      std: 1
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "concat3"
+  bottom: "conv3"
+  bottom: "flexconv3"
+  top: "concat3"
+  type: "Concat"
+  concat_param {
+    axis: 1
+  }
+}
+
+layer {
+  name: "weightconv3"
+  type: "Convolution"
+  bottom: "concat3"
+  top: "weightconv3"
+  param {
+    lr_mult: 0.0001
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param{
+    num_output: 1
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler{
+      type: "gaussian"
+      std: 1
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "relu3"
+  type: "ReLU"
+  bottom: "weightconv3"
+  top: "weightconv3"
+}
+# Flex Convolutional Layer Concatenate with Pure Convolutional Layer 3 End
+
+layer {
+  name: "crossEntropy"
+  type: "SigmoidCrossEntropyLoss"
+  bottom: "weightconv3"
+  bottom: "label"
+  top:"loss"
+  loss_weight: 1
+}

@@ -1,0 +1,118 @@
+name: "testnet"
+
+input: "data"
+input_dim: 1
+input_dim: 3
+input_dim: 321
+input_dim: 481
+
+layer {
+  name: "flexconv"
+  type: "FlexConvolution"
+  bottom: "data"
+  top: "flexconv"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+  flex_convolution_param {
+    sample_kernel_h: 3
+    sample_kernel_w: 3
+  }
+}
+
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "flexconv"
+  top: "flexconv"
+}
+
+layer {
+  name: "flexconv1"
+  type: "FlexConvolution"
+  bottom: "flexconv"
+  top: "flexconv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 64
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+  flex_convolution_param{
+    sample_kernel_h: 3
+    sample_kernel_w: 3
+  }
+}
+
+layer {
+  name: "relu2"
+  type: "ReLU"
+  bottom: "flexconv1"
+  top: "flexconv1"
+}
+
+layer {
+  name: "flexconv2"
+  type: "FlexConvolution"
+  bottom: "flexconv1"
+  top: "flexconv2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 1
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+  flex_convolution_param{
+    sample_kernel_h: 5
+    sample_kernel_w: 5
+  }
+}
+
+layer {
+  name: "relu3"
+  type: "ReLU"
+  bottom: "flexconv2"
+  top: "flexconv2"
+}

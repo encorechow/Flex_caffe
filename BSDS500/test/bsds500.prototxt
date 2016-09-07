@@ -1,0 +1,324 @@
+name: "bsds500"
+
+# Data Layers
+layer {
+  name: "data"
+  type: "ImageLabelmapData"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mirror: false
+    mean_value: 104.00699
+    mean_value: 116.66877
+    mean_value: 122.67892
+  }
+  image_data_param {
+    source: "train_pair.lst"
+    batch_size: 1
+    shuffle: true
+    new_height: 0
+    new_width: 0
+  }
+}
+
+
+layer {
+  name: "data"
+  type: "ImageLabelmapData"
+  top: "data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  transform_param {
+    mirror: false
+    mean_value: 104.00699
+    mean_value: 116.66877
+    mean_value: 122.67892
+  }
+  image_data_param {
+    source: "test_pair.lst"
+    batch_size: 1
+    shuffle: true
+    new_height: 0
+    new_width: 0
+  }
+}
+# Data Layers end
+
+
+# Convolutional Layer 1
+layer {
+  name: "conv"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv"
+  top: "conv"
+}
+
+# Convolutional Layer end
+
+# Flex Convolutional Layer Concatenate with Pure Convolutional Layer 1
+
+layer {
+  name: "flexconv1"
+  type: "FlexConvolution"
+  bottom: "conv"
+  top: "flexconv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+  flex_convolution_param {
+    sample_kernel_h: 3
+    sample_kernel_w: 3
+  }
+}
+
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "conv"
+  top: "conv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param{
+    num_output: 32
+    pad: 0
+    kernel_size: 1
+    stride: 1
+    weight_filler{
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "concat"
+  bottom: "conv1"
+  bottom: "flexconv1"
+  top: "concat1"
+  type: "Concat"
+  concat_param{
+    axis: 1
+  }
+}
+# Flex Convolutional Layer Concatenate with Pure Convolutional Layer 1 End
+
+# Flex Convolutional Layer Concatenate with Pure Convolutional Layer 2 End
+
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "flexconv"
+  top: "flexconv"
+}
+
+layer {
+  name: "flexconv1"
+  type: "FlexConvolution"
+  bottom: "flexconv"
+  top: "flexconv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 64
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+  flex_convolution_param{
+    sample_kernel_h: 3
+    sample_kernel_w: 3
+  }
+}
+
+layer {
+  name: "relu2"
+  type: "ReLU"
+  bottom: "flexconv1"
+  top: "flexconv1"
+}
+
+layer {
+  name: "flexconv2"
+  type: "FlexConvolution"
+  bottom: "flexconv1"
+  top: "flexconv2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 64
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+  flex_convolution_param{
+    sample_kernel_h: 5
+    sample_kernel_w: 5
+  }
+}
+
+layer {
+  name: "relu3"
+  type: "ReLU"
+  bottom: "flexconv2"
+  top: "flexconv2"
+}
+
+layer {
+  name: "flexconv3"
+  type: "FlexConvolution"
+  bottom: "flexconv2"
+  top: "flexconv3"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 64
+    pad: 3
+    kernel_size: 7
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+  flex_convolution_param{
+    sample_kernel_h: 5
+    sample_kernel_w: 5
+  }
+}
+
+layer {
+  name: "relu4"
+  type: "ReLU"
+  bottom: "flexconv3"
+  top: "flexconv3"
+}
+
+
+layer {
+  name: "flexconv4"
+  type: "FlexConvolution"
+  bottom: "flexconv3"
+  top: "flexconv4"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 1
+    pad: 3
+    kernel_size: 7
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+  flex_convolution_param{
+    sample_kernel_h: 5
+    sample_kernel_w: 5
+  }
+}
+
+layer {
+  name: "relu4"
+  type: "ReLU"
+  bottom: "flexconv4"
+  top: "flexconv4"
+}
+
+layer {
+  name: "crossEntropy"
+  type: "SigmoidCrossEntropyLoss"
+  bottom: "flexconv4"
+  bottom: "label"
+  top:"loss"
+  loss_weight: 1
+}
