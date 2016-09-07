@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Caffe
 
 [![Build Status](https://travis-ci.org/BVLC/caffe.svg?branch=master)](https://travis-ci.org/BVLC/caffe)
@@ -35,3 +36,6 @@ Please cite Caffe in your publications if it helps your research:
       Title = {Caffe: Convolutional Architecture for Fast Feature Embedding},
       Year = {2014}
     }
+=======
+# Flex_caffe
+>>>>>>> 165128079350c47cb0419cedc42a8b3d60e38f72
